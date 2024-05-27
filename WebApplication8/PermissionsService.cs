@@ -2,41 +2,47 @@
 
 namespace WebApplication8
 {
-    [Flags]
-    public enum Permissions
-    {
-        None = 0,
-        Read = 1 << 0,   // Bit 0
-        Write = 1 << 1,  // Bit 1
-        Delete = 1 << 2, // Bit 2
-                         // Add more permissions as needed
-    }
-
     public class PermissionsService
     {
         private readonly IMemoryCache _cache;
+        private readonly UserPermissionRepository _repository;
 
-        public PermissionsService(IMemoryCache cache)
+        public PermissionsService(IMemoryCache cache, UserPermissionRepository repository)
         {
             _cache = cache;
+            _repository = repository;
         }
 
-        public void UpdatePermissions(string userId, Permissions permissions)
+        public async Task<List<string>> GetUserPermissionsAsync(string userId)
+        {
+            if (_cache.TryGetValue($"permissions_{userId}", out List<string> cachedPermissions))
+            {
+                return cachedPermissions;
+            }
+
+            var userPermissionsList = await _repository.GetUserPermissionsAsync(userId);
+
+            _cache.Set($"permissions_{userId}", userPermissionsList, new MemoryCacheEntryOptions
+            {
+                AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
+            });
+
+            return userPermissionsList;
+        }
+
+        public async Task UpdatePermissions(string userId, List<string> permissions)
         {
             _cache.Set($"permissions_{userId}", permissions, new MemoryCacheEntryOptions
             {
                 AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(1)
             });
+
+            await _repository.UpdateUserPermissionsAsync(userId, permissions);
         }
 
-        public Permissions GetUserPermissions(string userId)
+        public void ClearPermissions(string userId)
         {
-            if (_cache.TryGetValue($"permissions_{userId}", out Permissions permissions))
-            {
-                return permissions;
-            }
-            return Permissions.None;
+            _cache.Remove($"permissions_{userId}");
         }
     }
-
 }

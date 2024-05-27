@@ -3,7 +3,6 @@
     public class UserPermission
     {
         public string? UserId { get; set; }
-        public Permissions Permissions { get; set; }
+        public int PermissionsBitwise { get; set; } // Permissions stored as bitwise format
     }
-
 }
