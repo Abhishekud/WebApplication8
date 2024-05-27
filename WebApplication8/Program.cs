@@ -1,5 +1,4 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.Extensions.Caching.Memory;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using WebApplication8;
@@ -24,6 +23,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddMemoryCache();
 builder.Services.AddSingleton<UserService>();
 builder.Services.AddSingleton<PermissionsService>();
+builder.Services.AddSingleton<UserPermissionRepository>(sp =>
+    new UserPermissionRepository(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
 

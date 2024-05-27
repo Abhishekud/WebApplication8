@@ -21,6 +21,7 @@ namespace WebApplication8.Controllers
 
         [HttpGet(Name = "GetWeatherForecast")]
         [Authorize]
+        [RequiredPermission("Read")]
         public IEnumerable<WeatherForecast> Get()
         {
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
