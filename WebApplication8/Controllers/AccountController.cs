@@ -25,11 +25,12 @@ namespace WebApplication8.Controllers
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public IActionResult Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> LoginAsync([FromBody] LoginRequest request)
         {
             // Validate the user credentials (you should replace this with your own logic)
             if (IsValidUserCredentials(request.Username, request.Password, out string userId))
             {
+                await _userService.OnUserLoginAsync(userId);
                 var token = GenerateJwtToken(userId);
                 return Ok(new { Token = token });
             }
